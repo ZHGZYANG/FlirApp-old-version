@@ -21,11 +21,11 @@ public class WelcomeActivity extends AppCompatActivity {
         TimerTask timerTask = new TimerTask() {
             @Override
             public void run() {
-                Intent intent1 = new Intent(WelcomeActivity.this, MainActivity.class);
+                Intent intent1 = new Intent(WelcomeActivity.this, CameraDetected.class);
                 startActivity(intent1);
                 WelcomeActivity.this.finish();
             }
         };
-        timer.schedule(timerTask, 1000*3);
+        timer.schedule(timerTask, 1000);
     }
 }

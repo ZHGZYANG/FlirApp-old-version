@@ -21,10 +21,9 @@
     <string name="end_message">Thank you!Your images have been recorded</string>
 
     <string name="textView11">%1$s</string>
-    <string name="video_record">VIDEO RECORD</string>
+    <string name="video_record">Video Record</string>
     <string name="photo_capture">Photo Capture</string>
     <string name="disconnect">disconnect</string>
     <string name="connect">Connect</string>
-    <string name="next">next</string>
 
 </resources>

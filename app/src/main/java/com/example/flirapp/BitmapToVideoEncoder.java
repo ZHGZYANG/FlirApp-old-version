@@ -35,7 +35,7 @@ public class BitmapToVideoEncoder {
     private static int mWidth;
     private static int mHeight;
     private static final int BIT_RATE = 16000000;
-    private static final int FRAME_RATE = 8; // Frames per second
+    private static final int FRAME_RATE = 30; // Frames per second
 
     private static final int I_FRAME_INTERVAL = 1;
 

@@ -5,7 +5,6 @@ import androidx.appcompat.app.AppCompatActivity;
 
 import android.annotation.SuppressLint;
 import android.graphics.Bitmap;
-import android.icu.text.DecimalFormat;
 import android.icu.text.SimpleDateFormat;
 import android.icu.util.Calendar;
 import android.icu.util.GregorianCalendar;
@@ -15,14 +14,9 @@ import android.media.MediaRecorder;
 import android.os.Bundle;
 import android.os.CountDownTimer;
 import android.os.Environment;
-import android.os.Handler;
-import android.os.Message;
-import android.os.SystemClock;
 import android.provider.MediaStore;
 import android.util.Log;
 import android.view.View;
-import android.widget.Button;
-import android.widget.Chronometer;
 import android.widget.ImageButton;
 import android.widget.ImageView;
 import android.widget.TextView;
@@ -37,8 +31,6 @@ import java.io.File;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.util.Locale;
-import java.util.Timer;
-import java.util.TimerTask;
 import java.util.concurrent.LinkedBlockingQueue;
 
 public class RecordProcess extends AppCompatActivity {
@@ -51,8 +43,7 @@ public class RecordProcess extends AppCompatActivity {
     private CameraHandler cameraHandler;
 
     private Identity connectedIdentity = null;
-    private Chronometer itimer;
-    private Button videoRecord;
+    private TextView status;
     private ImageButton captureButton;
     private ImageView msxImage;
     //    private ImageView photoImage;
@@ -61,12 +52,11 @@ public class RecordProcess extends AppCompatActivity {
     //    private Bitmap currentDcBitmap;//for capture
     private LinkedBlockingQueue<Bitmap> currentFramesBuffer = new LinkedBlockingQueue<>(100); //for video
     private boolean videoRecordFinished;
-    private boolean isVideoRecord=false;
+
 
     private LinkedBlockingQueue<FrameDataHolder> framesBuffer = new LinkedBlockingQueue<>(21);
     private UsbPermissionHandler usbPermissionHandler = new UsbPermissionHandler();
 
-    private VideoHandler videoHandlerIns;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -104,16 +94,16 @@ public class RecordProcess extends AppCompatActivity {
 //    }
 
 
-//    public void connect(View view) {
-////        connect(cameraHandler.getFlirOne());
-//        connect(cameraHandler.getFlirOneEmulator());
-//
-//    }
+    public void connect(View view) {
+//        connect(cameraHandler.getFlirOne());
+        connect(cameraHandler.getFlirOneEmulator());
+
+    }
 
 
-//    public void disconnect(View view) {
-//        disconnect();
-//    }
+    public void disconnect(View view) {
+        disconnect();
+    }
 
     /**
      * Handle Android permission request response for Bluetooth permissions
@@ -291,9 +281,7 @@ public class RecordProcess extends AppCompatActivity {
 //                    photoImage.setImageBitmap(poll.dcBitmap);
                 }
             });
-            if (!videoRecordFinished && isVideoRecord){
-                captureForVideo();
-            }
+//            capture();
         }
     };
 
@@ -337,12 +325,10 @@ public class RecordProcess extends AppCompatActivity {
 
 
     private void setupViews() {
-        itimer = findViewById(R.id.itimer);
+        status = findViewById(R.id.status);
 //        captureButton = findViewById(R.id.imageButton);
         msxImage = findViewById(R.id.msx_image);
 //        photoImage = findViewById(R.id.photo_image);
-        videoRecord = findViewById(R.id.videoRecord);
-
     }
 
 
@@ -389,107 +375,9 @@ public class RecordProcess extends AppCompatActivity {
         }).start();
     }
 
-    private void captureForVideo(){
-        new Thread(new Runnable() {
-            @SuppressLint("SetTextI18n")
-            @Override
-            public void run() {
-                String dirPath = Environment.getExternalStorageDirectory().getAbsolutePath() + "/flirapp/image/temp/";
-                File dir = new File(dirPath);
-                if (!dir.exists()) {
-                    dir.mkdirs();
-                }
-                String state = Environment.getExternalStorageState();
-                if (state.equals(Environment.MEDIA_MOUNTED)) {
-                    Calendar now = new GregorianCalendar();
-                    SimpleDateFormat simpleDate = new SimpleDateFormat("yyyyMMddHHmmssSS", Locale.getDefault());
-                    String fileName = simpleDate.format(now.getTime());
-                    try {
-                        File msxfile = new File(dirPath + fileName + ".jpg");
-//                        File dcfile=new File(dirPath + fileName + "dcbitmap.jpg");
-                        FileOutputStream msxout = new FileOutputStream(msxfile);
-//                        FileOutputStream dcout = new FileOutputStream(dcfile);
-                        currentMsxBitmap.compress(Bitmap.CompressFormat.JPEG, 100, msxout);
-//                        currentDcBitmap.compress(Bitmap.CompressFormat.JPEG, 100, dcout);
-                        msxout.flush();
-                        msxout.close();
-//                        dcout.flush();
-//                        dcout.close();
-                    } catch (Exception e) {
-                        Log.d("error","Save failed! " + e);
-                    }
-                } else {
-                     Log.d("error","Save failed! Media is not mounted.");
-                }
-            }
-        }).start();
-
-    }
-
-
-    @SuppressLint("SetTextI18n")
-    public void video2(View view){
-        if (videoRecord.getText().equals("VIDEO RECORD")) { // record
-            videoRecord.setText("STOP");
-            isVideoRecord=true;
-            videoRecordFinished = false;
-            timerStart();
-        } else if (videoRecord.getText().equals("STOP")){
-            videoRecord.setText("VIDEO RECORD");
-            timerStop();
-            videoRecordFinished = true;
-            isVideoRecord=false;
-            videoHandler2();
-        }
-
-    }
 
     @SuppressLint("SetTextI18n")
     public void video(View view) {
-        if (videoRecord.getText().equals("VIDEO RECORD")) { // record
-            videoRecord.setText("STOP");
-            new Thread(new Runnable() {
-                @Override
-                public void run() {
-                    String dirPath = Environment.getExternalStorageDirectory().getAbsolutePath() + "/flirapp/image/";
-                    File dir = new File(dirPath);
-                    if (!dir.exists()) {
-                        dir.mkdirs();
-                    }
-                    String state = Environment.getExternalStorageState();
-                    if (state.equals(Environment.MEDIA_MOUNTED)) {
-                        Calendar now = new GregorianCalendar();
-                        SimpleDateFormat simpleDate = new SimpleDateFormat("yyyyMMddHHmmss", Locale.getDefault());
-                        String fileName = simpleDate.format(now.getTime());
-                        videoRecordFinished = false;
-                        timerStart();
-                        try {
-                            int result = videoHandler(dirPath + fileName + ".mp4");
-                            runOnUiThread(() -> {
-                                showMessage.show("Saved.");
-                            });
-                        } catch (InterruptedException e) {
-                            runOnUiThread(() -> {
-                                showMessage.show("Save failed. " + e);
-                            });
-                        }
-                    } else {
-                        runOnUiThread(() -> {
-                            showMessage.show("Save failed! Media is not mounted.");
-                        });
-                    }
-                }
-            }).start();
-        } else if (videoRecord.getText().equals("STOP")){
-            videoRecord.setText("VIDEO RECORD");
-            timerStop();
-            videoRecordFinished = true;
-            videoHandlerIns.finished();
-
-        }
-    }
-
-    private void videoHandler2(){
         new Thread(new Runnable() {
             @Override
             public void run() {
@@ -503,19 +391,18 @@ public class RecordProcess extends AppCompatActivity {
                     Calendar now = new GregorianCalendar();
                     SimpleDateFormat simpleDate = new SimpleDateFormat("yyyyMMddHHmmss", Locale.getDefault());
                     String fileName = simpleDate.format(now.getTime());
-                    ////
-                    videoHandlerIns = new VideoHandler(dirPath + fileName + ".mp4");
+                    videoRecordFinished = false;
+                    timerStart();
                     try {
-                        videoHandlerIns.pass(dirPath+"temp/");
-                    } catch (IOException e) {
+                        int result = videoHandler(dirPath + fileName + ".mp4");
                         runOnUiThread(() -> {
-                            showMessage.show("Save failed! "+e);
+                            showMessage.show("Saved.");
+                        });
+                    } catch (InterruptedException e) {
+                        runOnUiThread(() -> {
+                            showMessage.show("Save failed. " + e);
                         });
                     }
-                    ////
-                    runOnUiThread(() -> {
-                        showMessage.show("Saved.");
-                    });
                 } else {
                     runOnUiThread(() -> {
                         showMessage.show("Save failed! Media is not mounted.");
@@ -525,35 +412,75 @@ public class RecordProcess extends AppCompatActivity {
         }).start();
     }
 
+
     private int videoHandler(String filePathName) throws InterruptedException {
-        videoHandlerIns = new VideoHandler(filePathName);
+        VideoHandler videoHandler = new VideoHandler(filePathName);
         int count = 0,inited=0;
-        Bitmap tmp=null;
         while (!videoRecordFinished) {
-            if (!currentMsxBitmap.isRecycled() && !currentMsxBitmap.equals(tmp)) {
-                tmp = currentMsxBitmap.copy(currentMsxBitmap.getConfig(), true);
-                videoHandlerIns.pass(tmp);
+            if (!currentMsxBitmap.isRecycled()) {
+                Bitmap tmp = currentMsxBitmap.copy(currentMsxBitmap.getConfig(), false);
+                videoHandler.pass(tmp);
                 count++;
-                if (count > 180 && inited==0) {
+                if (count > 100 && inited==0) {
                     inited=1;
-                    videoHandlerIns.init();
+                    videoHandler.init();
                 }
             }
         }
-//        runOnUiThread(() -> {
-//            showMessage.show("Preparing file...");
-//        });
-        return 1;
+        runOnUiThread(() -> {
+            showMessage.show("Preparing file...");
+        });
+        return videoHandler.finished();
     }
 
-    public void timerStop(){
-        itimer.stop();
+
+    private final CountDownTimer itimer = new CountDownTimer(30 * 1000, 1000) {
+        @Override
+        public void onTick(long millisUntilFinished) {
+            runOnUiThread(() -> {
+                status.setText(formatTime(millisUntilFinished));
+            });
+        }
+
+        @SuppressLint("SetTextI18n")
+        @Override
+        public void onFinish() {
+            videoRecordFinished = true;
+            runOnUiThread(() -> {
+                status.setText("00:00");
+            });
+        }
+    };
+
+
+    public String formatTime(long millisecond) {
+        int minute;
+        int second;
+        minute = (int) ((millisecond / 1000) / 60);
+        second = (int) ((millisecond / 1000) % 60);
+        if (minute < 10) {
+            if (second < 10) {
+                return "0" + minute + ":" + "0" + second;
+            } else {
+                return "0" + minute + ":" + second;
+            }
+        } else {
+            if (second < 10) {
+                return minute + ":" + "0" + second;
+            } else {
+                return minute + ":" + second;
+            }
+        }
+    }
+
+    public void timerCancel() {
+        itimer.cancel();
     }
 
     public void timerStart() {
-        itimer.setBase(SystemClock.elapsedRealtime());
         itimer.start();
     }
+
 
 }
 

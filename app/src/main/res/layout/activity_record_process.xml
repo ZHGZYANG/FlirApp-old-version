@@ -7,31 +7,30 @@
     android:orientation="vertical"
     tools:context=".RecordProcess">
 
+    <TextView
+        android:id="@+id/status"
+        android:layout_width="match_parent"
+        android:layout_height="69dp"
+        android:gravity="center"
+        android:text="@string/status"
+        android:textSize="40sp" />
+
     <FrameLayout
         android:layout_width="match_parent"
-        android:layout_height="506dp">
+        android:layout_height="410dp">
 
         <ImageView
             android:id="@+id/msx_image"
             android:layout_width="match_parent"
-            android:layout_height="506dp"
+            android:layout_height="410dp"
             android:contentDescription="image with IR and visual data mixed" />
 
         <ImageView
             android:id="@+id/imageView12"
             android:layout_width="match_parent"
-            android:layout_height="506dp"
+            android:layout_height="410dp"
             android:layout_weight="1"
             app:srcCompat="@drawable/feetmack" />
-
-        <Chronometer
-            android:id="@+id/itimer"
-            android:layout_width="match_parent"
-            android:layout_height="69dp"
-            android:format="%s"
-            android:gravity="center"
-            android:textColor="@color/white"
-            android:textSize="40sp" />
     </FrameLayout>
 
     <LinearLayout
@@ -51,9 +50,30 @@
             android:id="@+id/videoRecord"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:onClick="video2"
+            android:onClick="video"
             android:text="@string/video_record" />
 
+    </LinearLayout>
+
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="50dp"
+        android:gravity="center_horizontal"
+        android:orientation="horizontal">
+
+        <Button
+            android:id="@+id/connect"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:onClick="connect"
+            android:text="@string/connect" />
+
+        <Button
+            android:id="@+id/disconnect"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:onClick="disconnect"
+            android:text="@string/disconnect" />
     </LinearLayout>
 
 </LinearLayout>

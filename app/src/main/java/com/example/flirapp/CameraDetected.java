@@ -148,8 +148,8 @@ public class CameraDetected extends AppCompatActivity {
                     @SuppressLint("SetTextI18n")
                     @Override
                     public void run() {
-                        connect(cameraHandler.getFlirOne());
-//                        connect(cameraHandler.getFlirOneEmulator());
+//                        connect(cameraHandler.getFlirOne());
+                        connect(cameraHandler.getFlirOneEmulator());
                     }
                 };
                 timer.schedule(timerTask, 1000 * 8);
